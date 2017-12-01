@@ -1,0 +1,1 @@
+/usr/bin/arm-linux-gnueabi-gcc -std=c++0x -pthread -static  -rdynamic CMakeFiles/test.dir/cantest.c.o  -o ../../bin/test 

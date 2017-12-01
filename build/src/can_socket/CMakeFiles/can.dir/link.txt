@@ -1,0 +1,1 @@
+/usr/bin/arm-linux-gnueabi-g++  -std=c++0x -pthread -static  -rdynamic CMakeFiles/can.dir/can.cpp.o  -o ../../bin/can 
