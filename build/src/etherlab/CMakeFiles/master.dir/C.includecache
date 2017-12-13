@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/z/work/ecat_master/src/etherlab/ecrt.h
+asm/byteorder.h
+-
+linux/types.h
+-
+linux/time.h
+-
+stdlib.h
+-
+stdint.h
+-
+sys/time.h
+-
+
+/home/z/work/ecat_master/src/etherlab/main.c
+errno.h
+-
+signal.h
+-
+stdio.h
+-
+string.h
+-
+sys/resource.h
+-
+sys/time.h
+-
+sys/types.h
+-
+unistd.h
+-
+time.h
+-
+sys/mman.h
+-
+ecrt.h
+/home/z/work/ecat_master/src/etherlab/ecrt.h
+

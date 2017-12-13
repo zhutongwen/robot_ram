@@ -1,0 +1,2 @@
+/home/z/work/ecat_master/build/src/etherlab/CMakeFiles/lan9252.dir
+/home/z/work/ecat_master/build/src/etherlab/CMakeFiles/master.dir

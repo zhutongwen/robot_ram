@@ -1,4 +1,4 @@
-/******************************************************************************
+/*****************************************************************************
  *
  *  $Id$
  *
@@ -65,24 +65,52 @@ static ec_domain_state_t domain1_state = {};
 static uint8_t *domain1_pd = NULL;
 
 static ec_slave_config_t *sc_dig_out_01 = NULL;
+static ec_slave_config_t *sc_imu_01 = NULL;
+static ec_slave_config_t *sc_lan9252_01 = NULL;
 
 /****************************************************************************/
 
 // process data
 
-#define BusCoupler01_Pos  0, 0
-#define DigOutSlave01_Pos 0, 1
+//#define BusCoupler01_Pos    0, 0
+#define DigOutSlave01_Pos   0, 1
+//#define IMU_Pos             0, 0
 
 #define Beckhoff_EK1100 0x00000002, 0x044c2c52
 #define Beckhoff_EL2004 0x00000002, 0x07d43052
 
+#define GQY_IMU 0xE0000005, 0x24683052
+
 // offsets for PDO entries
 static unsigned int off_dig_out0 = 0;
+
+
+#define WMLAN9252_IO_POS 0, 0
+#define WMLAN9252_IO 0xE0000002, 0x92521000
+
+
+// offsets for PDO entries
+static unsigned int off_analog_data;
+static unsigned int off_keys;
+static unsigned int off_leds;
+
+struct wmlan9252_io_data_struct
+{
+  uint16_t analog_data;
+  uint8_t key0_1;
+  uint8_t led0_7;
+};
+static struct wmlan9252_io_data_struct wmlan9252_io_data;
 
 // process data
 
 const static ec_pdo_entry_reg_t domain1_regs[] = {
    {DigOutSlave01_Pos, Beckhoff_EL2004, 0x7000, 0x01, &off_dig_out0, NULL},
+#if 1
+    {WMLAN9252_IO_POS,  WMLAN9252_IO, 0x7000, 0x01, &off_leds, NULL},
+    {WMLAN9252_IO_POS,  WMLAN9252_IO, 0x6000, 0x01, &off_keys, NULL},
+    {WMLAN9252_IO_POS,  WMLAN9252_IO, 0x6020, 0x01, &off_analog_data, NULL},
+#endif
    {}
 };
 
@@ -111,6 +139,36 @@ ec_pdo_info_t slave_1_pdos[] = {
 ec_sync_info_t slave_1_syncs[] = {
    {0, EC_DIR_OUTPUT, 4, slave_1_pdos + 0, EC_WD_ENABLE},
    {0xff}
+};
+
+/*****************************************************************************/
+//wmlan9252_io
+//TxPdo
+ec_pdo_entry_info_t wmlan9252_io_txpdo_entries[] = {
+    {0x6000, 0x01, 8}, /* key0_2 */
+    {0, 0, 8}, //reserve
+    {0x6020, 0x01, 16}, /* analog_Input */
+};
+
+ec_pdo_info_t wmlan9252_io_txpdos[] = {
+    {0x1A02, 1, wmlan9252_io_txpdo_entries + 2}, /* TxPdo Channel 2 */
+    {0x1A00, 2, wmlan9252_io_txpdo_entries + 0}, /* TxPdo Channel 1 */
+};
+
+//RxPdo
+ec_pdo_entry_info_t wmlan9252_io_rxpdo_entries[] = {
+    {0x7000, 0x01, 8}, /* led0_8 */
+    {0, 0, 8}, //reserve
+};
+
+ec_pdo_info_t wmlan9252_io_rxpdos[] = {
+    {0x1601, 2, wmlan9252_io_rxpdo_entries + 0}, /* RxPdo Channel 1 */
+};
+
+ec_sync_info_t wmlan9252_io_syncs[] = {
+    {2, EC_DIR_OUTPUT, 1, wmlan9252_io_rxpdos, EC_WD_ENABLE},
+    {3, EC_DIR_INPUT,  2, wmlan9252_io_txpdos, EC_WD_ENABLE},
+    {0xff}
 };
 
 /*****************************************************************************
@@ -184,6 +242,24 @@ void my_task_proc(void *arg)
         if (!(cycle_counter % 200)) {
             blink = !blink;
         }
+#if 1
+        static int counter_txrx = 0;
+        if((++counter_txrx) >= 100)
+        {
+            counter_txrx = 0;
+            #if 1
+                // read process data
+                wmlan9252_io_data.analog_data = EC_READ_S16(domain1_pd + off_analog_data);
+                wmlan9252_io_data.key0_1 =  EC_READ_U8(domain1_pd + off_keys);
+                // write process data
+                EC_WRITE_U8(domain1_pd + off_leds, ++wmlan9252_io_data.led0_7);
+            #endif
+             printf("send leds value: 0x%-4x receive ADC value: %-6d receive keys: 0x%-4x   \n\n",
+                    wmlan9252_io_data.led0_7,
+                    wmlan9252_io_data.analog_data,
+                    wmlan9252_io_data.key0_1);
+        }
+#endif
 
         EC_WRITE_U8(domain1_pd + off_dig_out0, blink ? 0x0 : 0x0F);
 
@@ -237,10 +313,31 @@ int main(int argc, char *argv[])
     printf("Creating slave configurations...\n");
 
     // Create configuration for bus coupler
-    sc = ecrt_master_slave_config(master, BusCoupler01_Pos, Beckhoff_EK1100);
-    if (!sc) {
+//    sc = ecrt_master_slave_config(master, BusCoupler01_Pos, Beckhoff_EK1100);
+//    if (!sc) {
+//        return -1;
+//    }
+
+//    sc_imu_01 = ecrt_master_slave_config(master, IMU_Pos, GQY_IMU);
+//    if(!sc_imu_01)
+//    {
+//        fprintf(stderr, "Failed to get slave configuration.\n");
+//        return -1;
+//    }
+/////////////////////////////////
+#if 1
+    sc_lan9252_01 = ecrt_master_slave_config(master, WMLAN9252_IO_POS, WMLAN9252_IO);
+    if (!sc_lan9252_01)
+    {
         return -1;
     }
+
+    if (ecrt_slave_config_pdos(sc_lan9252_01, EC_END, wmlan9252_io_syncs))
+    {
+        fprintf(stderr, "Failed to configure PDOs.\n");
+        return -1;
+    }
+#endif
 
     sc_dig_out_01 =
         ecrt_master_slave_config(master, DigOutSlave01_Pos, Beckhoff_EL2004);
@@ -253,6 +350,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Failed to configure PDOs.\n");
         return -1;
     }
+
+
 
     if (ecrt_domain_reg_pdo_entry_list(domain1, domain1_regs)) {
         fprintf(stderr, "PDO entry registration failed!\n");
@@ -295,4 +394,4 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-/****************************************************************************/
+/***************************************************************************/

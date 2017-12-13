@@ -1,0 +1,1 @@
+/usr/bin/g++   -std=c++11 -pthread    CMakeFiles/master.dir/master.cpp.o  -o ../../bin/master  -L/usr/xenomai/lib  -L/home/z/work/ecat_master/lib -rdynamic -lnative -lrtdm -lxenomai -lethercat_rtdm -Wl,-rpath,/usr/xenomai/lib:/home/z/work/ecat_master/lib 

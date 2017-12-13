@@ -1,0 +1,1 @@
+/usr/bin/g++   -std=c++11 -pthread    CMakeFiles/tinyxml2_test.dir/tinyxml_test.cpp.o CMakeFiles/tinyxml2_test.dir/tinyxml2.cpp.o  -o ../../bin/tinyxml2_test -rdynamic 

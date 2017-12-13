@@ -1,5 +1,5 @@
 project(ecat_master)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8)
 
 
 ##arm-linux
@@ -28,7 +28,7 @@ cmake_minimum_required(VERSION 3.0)
 
 #set(CMAKE_C_FLAGS " -pthread ")
 #set(CMAKE_CXX_FLAGS "-std=c++11 -pthread -static")
-#set(CMAKE_CXX_FLAGS "-std=c++11 -pthread")
+set(CMAKE_CXX_FLAGS "-std=c++11 -pthread")
 
 
 #add_subdirectory(src/socket)

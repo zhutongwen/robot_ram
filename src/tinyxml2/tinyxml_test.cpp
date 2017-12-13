@@ -6,12 +6,16 @@
 #include <iostream>
 #include <string>
 #include "tinyxml2.h"
+#include <unistd.h>
+#include <libgen.h>
+
 using namespace std;
 using namespace tinyxml2;
 void example1()
 {
    XMLDocument doc;
-   if(doc.LoadFile("/home/z/work/ecat_master/resource/test.xml") != XML_SUCCESS)
+//   if(doc.LoadFile("/home/z/work/ecat_master/resource/test.xml") != XML_SUCCESS)
+   if(doc.LoadFile("./test.xml") != XML_SUCCESS)
    {
        cout << "load text.xml file fault!" << doc.LoadFile("test.xml") << endl;
        exit(1);
@@ -36,17 +40,7 @@ void example1()
 }
 int main(int argc, char** argv)
 {
+    chdir(dirname(argv[0]));
    example1();
    return 0;
 }
-
-//int main(int argc, char** argv)
-//{
-//    if (argc != 3)
-//    {
-//        cout << "usage: " << argv[0] << " <port> <ip>" << endl;
-//        exit(1);
-//    }
-
-//  return 0;
-//}
