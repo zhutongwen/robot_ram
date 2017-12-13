@@ -1,1 +1,0 @@
-/usr/bin/arm-linux-gnueabi-g++  -std=c++0x -pthread -static  -rdynamic CMakeFiles/server.dir/server.cpp.o CMakeFiles/server.dir/tcpstream.cpp.o CMakeFiles/server.dir/tcpacceptor.cpp.o  -o ../../bin/server 
