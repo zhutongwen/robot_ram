@@ -99,18 +99,18 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-src/etherlab/CMakeFiles/lan9252.dir/rule:
-	cd /home/z/work/ecat_master/build && $(MAKE) -f CMakeFiles/Makefile2 src/etherlab/CMakeFiles/lan9252.dir/rule
-.PHONY : src/etherlab/CMakeFiles/lan9252.dir/rule
+src/etherlab/CMakeFiles/lan9252_IO.dir/rule:
+	cd /home/z/work/ecat_master/build && $(MAKE) -f CMakeFiles/Makefile2 src/etherlab/CMakeFiles/lan9252_IO.dir/rule
+.PHONY : src/etherlab/CMakeFiles/lan9252_IO.dir/rule
 
 # Convenience name for target.
-lan9252: src/etherlab/CMakeFiles/lan9252.dir/rule
-.PHONY : lan9252
+lan9252_IO: src/etherlab/CMakeFiles/lan9252_IO.dir/rule
+.PHONY : lan9252_IO
 
 # fast build rule for target.
-lan9252/fast:
-	cd /home/z/work/ecat_master/build && $(MAKE) -f src/etherlab/CMakeFiles/lan9252.dir/build.make src/etherlab/CMakeFiles/lan9252.dir/build
-.PHONY : lan9252/fast
+lan9252_IO/fast:
+	cd /home/z/work/ecat_master/build && $(MAKE) -f src/etherlab/CMakeFiles/lan9252_IO.dir/build.make src/etherlab/CMakeFiles/lan9252_IO.dir/build
+.PHONY : lan9252_IO/fast
 
 # Convenience name for target.
 src/etherlab/CMakeFiles/master.dir/rule:
@@ -126,29 +126,29 @@ master/fast:
 	cd /home/z/work/ecat_master/build && $(MAKE) -f src/etherlab/CMakeFiles/master.dir/build.make src/etherlab/CMakeFiles/master.dir/build
 .PHONY : master/fast
 
-main.o: main.c.o
-.PHONY : main.o
+lan9252_IO.o: lan9252_IO.c.o
+.PHONY : lan9252_IO.o
 
 # target to build an object file
-main.c.o:
-	cd /home/z/work/ecat_master/build && $(MAKE) -f src/etherlab/CMakeFiles/lan9252.dir/build.make src/etherlab/CMakeFiles/lan9252.dir/main.c.o
-.PHONY : main.c.o
+lan9252_IO.c.o:
+	cd /home/z/work/ecat_master/build && $(MAKE) -f src/etherlab/CMakeFiles/lan9252_IO.dir/build.make src/etherlab/CMakeFiles/lan9252_IO.dir/lan9252_IO.c.o
+.PHONY : lan9252_IO.c.o
 
-main.i: main.c.i
-.PHONY : main.i
+lan9252_IO.i: lan9252_IO.c.i
+.PHONY : lan9252_IO.i
 
 # target to preprocess a source file
-main.c.i:
-	cd /home/z/work/ecat_master/build && $(MAKE) -f src/etherlab/CMakeFiles/lan9252.dir/build.make src/etherlab/CMakeFiles/lan9252.dir/main.c.i
-.PHONY : main.c.i
+lan9252_IO.c.i:
+	cd /home/z/work/ecat_master/build && $(MAKE) -f src/etherlab/CMakeFiles/lan9252_IO.dir/build.make src/etherlab/CMakeFiles/lan9252_IO.dir/lan9252_IO.c.i
+.PHONY : lan9252_IO.c.i
 
-main.s: main.c.s
-.PHONY : main.s
+lan9252_IO.s: lan9252_IO.c.s
+.PHONY : lan9252_IO.s
 
 # target to generate assembly for a file
-main.c.s:
-	cd /home/z/work/ecat_master/build && $(MAKE) -f src/etherlab/CMakeFiles/lan9252.dir/build.make src/etherlab/CMakeFiles/lan9252.dir/main.c.s
-.PHONY : main.c.s
+lan9252_IO.c.s:
+	cd /home/z/work/ecat_master/build && $(MAKE) -f src/etherlab/CMakeFiles/lan9252_IO.dir/build.make src/etherlab/CMakeFiles/lan9252_IO.dir/lan9252_IO.c.s
+.PHONY : lan9252_IO.c.s
 
 master.o: master.cpp.o
 .PHONY : master.o
@@ -181,12 +181,12 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... lan9252"
+	@echo "... lan9252_IO"
 	@echo "... master"
 	@echo "... rebuild_cache"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... lan9252_IO.o"
+	@echo "... lan9252_IO.i"
+	@echo "... lan9252_IO.s"
 	@echo "... master.o"
 	@echo "... master.i"
 	@echo "... master.s"

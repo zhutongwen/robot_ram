@@ -99,17 +99,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named lan9252
+# Target rules for targets named lan9252_IO
 
 # Build rule for target.
-lan9252: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 lan9252
-.PHONY : lan9252
+lan9252_IO: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 lan9252_IO
+.PHONY : lan9252_IO
 
 # fast build rule for target.
-lan9252/fast:
-	$(MAKE) -f src/etherlab/CMakeFiles/lan9252.dir/build.make src/etherlab/CMakeFiles/lan9252.dir/build
-.PHONY : lan9252/fast
+lan9252_IO/fast:
+	$(MAKE) -f src/etherlab/CMakeFiles/lan9252_IO.dir/build.make src/etherlab/CMakeFiles/lan9252_IO.dir/build
+.PHONY : lan9252_IO/fast
 
 #=============================================================================
 # Target rules for targets named master
@@ -132,7 +132,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... lan9252"
+	@echo "... lan9252_IO"
 	@echo "... master"
 .PHONY : help
 

@@ -2172,6 +2172,9 @@ void ecrt_reg_request_read(
 #define EC_READ_S32(DATA) \
      ((int32_t) le32_to_cpup((void *) (DATA)))
 
+#define EC_READ_FLOAT(DATA) \
+     (*((float *) (DATA)))
+
 /** Read a 64-bit unsigned value from EtherCAT data.
  *
  * \param DATA EtherCAT data pointer

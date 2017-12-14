@@ -20,7 +20,7 @@ stdint.h
 sys/time.h
 -
 
-/home/z/work/ecat_master/src/etherlab/main.c
+/home/z/work/ecat_master/src/etherlab/lan9252_IO.c
 errno.h
 -
 signal.h

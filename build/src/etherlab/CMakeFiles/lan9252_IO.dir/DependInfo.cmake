@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_C
-  "/home/z/work/ecat_master/src/etherlab/main.c" "/home/z/work/ecat_master/build/src/etherlab/CMakeFiles/lan9252.dir/main.c.o"
+  "/home/z/work/ecat_master/src/etherlab/lan9252_IO.c" "/home/z/work/ecat_master/build/src/etherlab/CMakeFiles/lan9252_IO.dir/lan9252_IO.c.o"
   )
 SET(CMAKE_C_COMPILER_ID "GNU")
 

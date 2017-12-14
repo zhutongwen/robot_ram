@@ -53,6 +53,8 @@ RT_TASK my_task;
 
 static int run = 1;
 
+using namespace std;
+
 /****************************************************************************/
 
 // EtherCAT
@@ -74,26 +76,51 @@ static ec_slave_config_t *sc_lan9252_01 = NULL;
 
 //#define BusCoupler01_Pos    0, 0
 #define DigOutSlave01_Pos   0, 1
-//#define IMU_Pos             0, 0
+
 
 #define Beckhoff_EK1100 0x00000002, 0x044c2c52
 #define Beckhoff_EL2004 0x00000002, 0x07d43052
 
-#define GQY_IMU 0xE0000005, 0x24683052
 
 // offsets for PDO entries
 static unsigned int off_dig_out0 = 0;
 
+/********************************************************
+ *GQY_IMU
+ */
+#define IMU_Pos             0, 0
+#define GQY_IMU 0xE0000005, 0x26483052
+// offsets for PDO entries
+static unsigned int off_imu_gx;
+static unsigned int off_imu_gy;
+static unsigned int off_imu_gz;
+static unsigned int off_imu_ax;
+static unsigned int off_imu_ay;
+static unsigned int off_imu_az;
+static unsigned int off_imu_counter;
+static unsigned int off_imu_led;
+struct gqy_imu_data_struct
+{
+    float gx;
+    float gy;
+    float gz;
+    float ax;
+    float ay;
+    float az;
+    uint32_t counter;
+    uint16_t led;
+};
+static struct gqy_imu_data_struct gqy_imu_data;
 
-#define WMLAN9252_IO_POS 0, 0
+/********************************************************
+ *lan9252
+ */
+#define WMLAN9252_IO_POS 0, 2
 #define WMLAN9252_IO 0xE0000002, 0x92521000
-
-
 // offsets for PDO entries
 static unsigned int off_analog_data;
 static unsigned int off_keys;
 static unsigned int off_leds;
-
 struct wmlan9252_io_data_struct
 {
   uint16_t analog_data;
@@ -103,15 +130,26 @@ struct wmlan9252_io_data_struct
 static struct wmlan9252_io_data_struct wmlan9252_io_data;
 
 // process data
-
-const static ec_pdo_entry_reg_t domain1_regs[] = {
-   {DigOutSlave01_Pos, Beckhoff_EL2004, 0x7000, 0x01, &off_dig_out0, NULL},
+const static ec_pdo_entry_reg_t domain1_regs[] =
+{
+    {DigOutSlave01_Pos, Beckhoff_EL2004, 0x7000, 0x01, &off_dig_out0, NULL},
 #if 1
     {WMLAN9252_IO_POS,  WMLAN9252_IO, 0x7000, 0x01, &off_leds, NULL},
     {WMLAN9252_IO_POS,  WMLAN9252_IO, 0x6000, 0x01, &off_keys, NULL},
     {WMLAN9252_IO_POS,  WMLAN9252_IO, 0x6020, 0x01, &off_analog_data, NULL},
 #endif
-   {}
+
+#if 1
+    {IMU_Pos,  GQY_IMU, 0x6000, 0x01, &off_imu_gx, NULL},
+    {IMU_Pos,  GQY_IMU, 0x6000, 0x02, &off_imu_gy, NULL},
+    {IMU_Pos,  GQY_IMU, 0x6000, 0x03, &off_imu_gz, NULL},
+    {IMU_Pos,  GQY_IMU, 0x6000, 0x04, &off_imu_ax, NULL},
+    {IMU_Pos,  GQY_IMU, 0x6000, 0x05, &off_imu_ay, NULL},
+    {IMU_Pos,  GQY_IMU, 0x6000, 0x06, &off_imu_az, NULL},
+    {IMU_Pos,  GQY_IMU, 0x6000, 0x07, &off_imu_counter, NULL},
+    {IMU_Pos,  GQY_IMU, 0x7011, 0x01, &off_imu_led, NULL},
+#endif
+    {}
 };
 
 /****************************************************************************/
@@ -168,6 +206,38 @@ ec_pdo_info_t wmlan9252_io_rxpdos[] = {
 ec_sync_info_t wmlan9252_io_syncs[] = {
     {2, EC_DIR_OUTPUT, 1, wmlan9252_io_rxpdos, EC_WD_ENABLE},
     {3, EC_DIR_INPUT,  2, wmlan9252_io_txpdos, EC_WD_ENABLE},
+    {0xff}
+};
+
+/*****************************************************************************/
+//GQY_IMU
+//TxPdo
+ec_pdo_entry_info_t gqy_imu_txpdo_entries[] = {
+    {0x6000, 0x01, 32}, /* gx */
+    {0x6000, 0x02, 32}, /* gy */
+    {0x6000, 0x03, 32}, /* gz */
+    {0x6000, 0x04, 32}, /* ax */
+    {0x6000, 0x05, 32}, /* ay */
+    {0x6000, 0x06, 32}, /* az */
+    {0x6000, 0x07, 32}, /* counter */
+};
+
+ec_pdo_info_t gqy_imu_txpdos[] = {
+    {0x1a00, 7, gqy_imu_txpdo_entries + 0}, /* TxPdo Channel 1 */
+};
+
+//RxPdo
+ec_pdo_entry_info_t gqy_imu_rxpdo_entries[] = {
+    {0x7011, 0x01, 16}, /* led0_8 */
+};
+
+ec_pdo_info_t gqy_imu_rxpdos[] = {
+    {0x1601, 1, gqy_imu_rxpdo_entries + 0}, /* RxPdo Channel 1 */
+};
+
+ec_sync_info_t gqy_imu_io_syncs[] = {
+    {2, EC_DIR_OUTPUT, 1, gqy_imu_rxpdos, EC_WD_ENABLE},
+    {3, EC_DIR_INPUT,  1, gqy_imu_txpdos, EC_WD_ENABLE},
     {0xff}
 };
 
@@ -242,22 +312,63 @@ void my_task_proc(void *arg)
         if (!(cycle_counter % 200)) {
             blink = !blink;
         }
-#if 1
-        static int counter_txrx = 0;
-        if((++counter_txrx) >= 100)
+/////////////////
+// lan9252
+#if 0
         {
-            counter_txrx = 0;
-            #if 1
-                // read process data
-                wmlan9252_io_data.analog_data = EC_READ_S16(domain1_pd + off_analog_data);
-                wmlan9252_io_data.key0_1 =  EC_READ_U8(domain1_pd + off_keys);
-                // write process data
-                EC_WRITE_U8(domain1_pd + off_leds, ++wmlan9252_io_data.led0_7);
-            #endif
-             printf("send leds value: 0x%-4x receive ADC value: %-6d receive keys: 0x%-4x   \n\n",
-                    wmlan9252_io_data.led0_7,
-                    wmlan9252_io_data.analog_data,
-                    wmlan9252_io_data.key0_1);
+            static int counter_txrx = 0;
+            if((++counter_txrx) >= 100)
+            {
+                counter_txrx = 0;
+                #if 1
+                    // read process data
+                    wmlan9252_io_data.analog_data = EC_READ_S16(domain1_pd + off_analog_data);
+                    wmlan9252_io_data.key0_1 =  EC_READ_U8(domain1_pd + off_keys);
+                    // write process data
+                    EC_WRITE_U8(domain1_pd + off_leds, ++wmlan9252_io_data.led0_7);
+                #endif
+                 printf("send leds value: 0x%-4x receive ADC value: %-6d receive keys: 0x%-4x   \n\n",
+                        wmlan9252_io_data.led0_7,
+                        wmlan9252_io_data.analog_data,
+                        wmlan9252_io_data.key0_1);
+            }
+        }
+#endif
+
+/////////////////////////////
+/// IMU
+/////////////////////////////
+#if 1
+        {
+            static int counter_txrx = 0;
+            if((++counter_txrx) >= 1000)
+            {
+                counter_txrx = 0;
+                #if 1
+                    // read process data
+                    gqy_imu_data.gx = EC_READ_FLOAT(domain1_pd + off_imu_gx);
+                    gqy_imu_data.gy = EC_READ_FLOAT(domain1_pd + off_imu_gy);
+                    gqy_imu_data.gz = EC_READ_FLOAT(domain1_pd + off_imu_gz);
+                    gqy_imu_data.ax = EC_READ_FLOAT(domain1_pd + off_imu_ax);
+                    gqy_imu_data.ay = EC_READ_FLOAT(domain1_pd + off_imu_ay);
+                    gqy_imu_data.az = EC_READ_FLOAT(domain1_pd + off_imu_az);
+                    gqy_imu_data.counter = EC_READ_U32(domain1_pd + off_imu_counter);
+                    // write process data
+                    EC_WRITE_U16(domain1_pd + off_imu_led, 0xaa55);
+                #endif
+//                 printf("ax:%f     ay:%f        imu counter:%d      \n\n",
+//                        gqy_imu_data.ax,
+//                        gqy_imu_data.ay,
+//                        gqy_imu_data.counter);
+                std::cout << "gx:" << gqy_imu_data.gx << endl;
+                std::cout << "gy:" << gqy_imu_data.gy << endl;
+                std::cout << "gz:" << gqy_imu_data.gz << endl;
+                std::cout << "ax:" << gqy_imu_data.ax << endl;
+                std::cout << "ay:" << gqy_imu_data.ay << endl;
+                std::cout << "az:" << gqy_imu_data.az << endl;
+                std::cout << "counter:" << gqy_imu_data.counter << endl;
+                std::cout << endl;
+            }
         }
 #endif
 
@@ -317,14 +428,23 @@ int main(int argc, char *argv[])
 //    if (!sc) {
 //        return -1;
 //    }
-
-//    sc_imu_01 = ecrt_master_slave_config(master, IMU_Pos, GQY_IMU);
-//    if(!sc_imu_01)
-//    {
-//        fprintf(stderr, "Failed to get slave configuration.\n");
-//        return -1;
-//    }
-/////////////////////////////////
+///////////////////////////
+/// GQY IMU
+///////////////////////////
+    sc_imu_01 = ecrt_master_slave_config(master, IMU_Pos, GQY_IMU);
+    if(!sc_imu_01)
+    {
+        fprintf(stderr, "Failed to get slave configuration.\n");
+        return -1;
+    }
+    if (ecrt_slave_config_pdos(sc_imu_01, EC_END, gqy_imu_io_syncs))
+    {
+        fprintf(stderr, "Failed to configure PDOs.\n");
+        return -1;
+    }
+/////////////////////////////
+/// lan9252
+/////////////////////////////
 #if 1
     sc_lan9252_01 = ecrt_master_slave_config(master, WMLAN9252_IO_POS, WMLAN9252_IO);
     if (!sc_lan9252_01)
